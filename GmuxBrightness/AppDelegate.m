@@ -161,6 +161,9 @@ CGEventRef tapCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef event
     self.chipsecDeviceFd = open(CHIPSEC_DEVICE, O_RDWR | O_APPEND);
     [self setInitialBrightness];
 
+    [NSWorkspace.sharedWorkspace.notificationCenter addObserver:self selector:@selector(displayDidWake)
+                                                           name:NSWorkspaceScreensDidWakeNotification object:nil];
+
     self.tapPort = CGEventTapCreate(kCGSessionEventTap, kCGHeadInsertEventTap, kCGEventTapOptionDefault,
                                     CGEventMaskBit(kCGEventKeyDown), tapCallback, (__bridge void*)(self));
     if (!self.tapPort)
@@ -209,6 +212,13 @@ CGEventRef tapCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef event
 
 - (uint64_t)currentBrightness {
     return [self sendIoctlRequest:CHIPSEC_IOC_RDIO withValue:0];
+}
+
+#pragma mark - Notifications
+
+- (void)displayDidWake {
+    // restore last brightness
+    [self setBrightnessIndex:self.currentBrightnessIndex];
 }
 
 @end
