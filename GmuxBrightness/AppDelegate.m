@@ -44,6 +44,7 @@ typedef struct _io_msg_t {
 @property (nonatomic, assign) CFRunLoopSourceRef tapPortSource;
 
 @property (nonatomic, assign) int chipsecDeviceFd;
+@property (nonatomic, strong) NSStatusItem* statusItem;
 
 - (void)setBrightnessIndex:(NSUInteger)newBrightnessIndex;
 
@@ -114,6 +115,12 @@ CGEventRef tapCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef event
             [NSApp terminate:nil];
         });
     }];
+
+    self.statusItem = [NSStatusBar.systemStatusBar statusItemWithLength:NSVariableStatusItemLength];
+    self.statusItem.button.image = [NSImage imageWithSystemSymbolName:@"sun.max" accessibilityDescription:nil];
+
+    self.statusItem.menu = [[NSMenu alloc] initWithTitle:@""];
+    [self.statusItem.menu addItemWithTitle:@"Quit" action:@selector(terminate:) keyEquivalent:@""];
 }
 
 - (void)applicationWillTerminate:(NSNotification*)aNotification {
@@ -155,15 +162,28 @@ CGEventRef tapCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef event
     [alert runModal];
 }
 
+- (void)setCurrentBrightnessIndex:(NSUInteger)newIndex {
+    if (_currentBrightnessIndex == newIndex)
+        return;
+    _currentBrightnessIndex = newIndex;
+
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.statusItem.button.title = [NSString stringWithFormat:@"%lu/%lu", newIndex, self.brightnessLevels.count - 1];
+    });
+}
+
 #pragma mark Initial setup
 
 - (void)performInitialSetup {
     self.chipsecDeviceFd = open(CHIPSEC_DEVICE, O_RDWR | O_APPEND);
     [self setInitialBrightness];
+    [self setupKeyTap];
 
     [NSWorkspace.sharedWorkspace.notificationCenter addObserver:self selector:@selector(displayDidWake)
                                                            name:NSWorkspaceScreensDidWakeNotification object:nil];
+}
 
+- (void)setupKeyTap {
     self.tapPort = CGEventTapCreate(kCGSessionEventTap, kCGHeadInsertEventTap, kCGEventTapOptionDefault,
                                     CGEventMaskBit(kCGEventKeyDown), tapCallback, (__bridge void*)(self));
     if (!self.tapPort)
