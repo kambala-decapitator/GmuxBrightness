@@ -12,6 +12,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		AC67745C2BB0437C00A4E4D9 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		AC9C24E82BAF13E10013B8B5 /* GmuxBrightness.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GmuxBrightness.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AC9C24EB2BAF13E10013B8B5 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		AC9C24EC2BAF13E10013B8B5 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -32,6 +33,7 @@
 		AC9C24DF2BAF13E10013B8B5 = {
 			isa = PBXGroup;
 			children = (
+				AC67745C2BB0437C00A4E4D9 /* README.md */,
 				AC9C24EA2BAF13E10013B8B5 /* GmuxBrightness */,
 				AC9C24E92BAF13E10013B8B5 /* Products */,
 			);
