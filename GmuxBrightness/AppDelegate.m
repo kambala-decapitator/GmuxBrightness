@@ -238,7 +238,7 @@ CGEventRef tapCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef event
 
 - (void)displayDidWake {
     // restore last brightness
-    [self setBrightnessIndex:self.currentBrightnessIndex];
+    [self setBrightnessIndex:self.currentBrightnessIndex == 0 ? 1 : self.currentBrightnessIndex];
 }
 
 @end
