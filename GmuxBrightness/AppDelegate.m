@@ -102,6 +102,10 @@ CGEventRef tapCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef event
         @82311, // max, can also be obtained from I/O port 0x770
     ];
 
+    if (![self adjustKarabinerHotkeys]) {
+        [NSApp terminate:nil];
+    }
+
     [self loadChipsecKext:YES completion:^(NSTask* _Nonnull task) {
         if (task.terminationStatus == 0) {
             [self performInitialSetup];
@@ -140,6 +144,27 @@ CGEventRef tapCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef event
 
 #pragma mark - Private
 
+- (BOOL)adjustKarabinerHotkeys {
+    __auto_type d = [NSData dataWithContentsOfURL:[NSURL fileURLWithPath:@"~/.config/karabiner/karabiner.json" isDirectory:NO]];
+    [self showErrorAlertWithMessage:@"Error calling kmutil. Are you running the app as root?"
+                          extraInfo:errorText];
+    /*
+profiles.fn_function_keys array
+
+from.key_code == f1
+to[0] = {consumer_key_code: apple_display_brightness_decrement}
+    */
+}
+
+- (void)showErrorAlertWithMessage:(NSString*)message extraInfo:(NSString*)extraInfo {
+    __auto_type alert = [NSAlert new];
+    alert.alertStyle = NSAlertStyleCritical;
+    alert.messageText = message;
+    alert.informativeText = extraInfo;
+    [alert addButtonWithTitle:@"OK"];
+    [alert runModal];
+}
+
 - (void)loadChipsecKext:(BOOL)shouldLoad completion:(nullable void(^)(NSTask* _Nonnull task))completionHandler {
     __auto_type task = [NSTask new];
     task.executableURL = [NSURL fileURLWithPath:@"/usr/bin/kmutil"];
@@ -154,12 +179,8 @@ CGEventRef tapCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef event
 }
 
 - (void)showKextAlertWithErrorText:(NSString*)errorText {
-    __auto_type alert = [NSAlert new];
-    alert.alertStyle = NSAlertStyleCritical;
-    alert.messageText = @"Error calling kmutil. Are you running the app as root?";
-    alert.informativeText = errorText;
-    [alert addButtonWithTitle:@"OK"];
-    [alert runModal];
+    [self showErrorAlertWithMessage:@"Error calling kmutil. Are you running the app as root?"
+                          extraInfo:errorText];
 }
 
 - (void)setCurrentBrightnessIndex:(NSUInteger)newIndex {
